@@ -65,7 +65,7 @@ while true; do
 		;;
     -i | --make_index)
 		make_index=true
-		shift 1
+		shift 2
 		;;
     -u | --include)
 		include=$2
