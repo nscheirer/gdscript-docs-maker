@@ -4,7 +4,7 @@ project_directory="$1"
 output_directory="export"
 directories_override=""
 format="markdown"
-author="developer"
+author="VitreousGames"
 
 echo_help() {
 	echo '
@@ -113,7 +113,7 @@ path_collector="godot-scripts/Collector.gd"
 # Overrides the content of the directories variable in ReferenceCollectorCLI.gd if we got --directory arguments
 file_ref_collector=$(mktemp)
 cat $path_ref_collector >$file_ref_collector
-if test $directories_override != ""; then
+if [$directories_override != ""]; then
 	args=$(echo $directories_override | sed -r 's/([-._a-zA-Z0-9]+)/"\1",/g' | sed -r 's/,$//')
 	sed -ri "s/^var directories.+/var directories := [$args]/" $file_ref_collector
 fi
@@ -122,7 +122,7 @@ cp -v $file_ref_collector "$godot_project_dir/$(basename $path_ref_collector)"
 cp -v $path_collector "$godot_project_dir"
 
 echo "Generating reference json data..."
-godot --editor --quit --script --no-window --path "$godot_project_dir" ReferenceCollectorCLI.gd >/dev/null
+godot --editor --quit --no-window --path "$godot_project_dir" --script ReferenceCollectorCLI.gd >/dev/null
 test $? -gt 0 && echo "There was an error running 'godot'.
 The program 'godot' must be available on the system '\$PATH' variable for this program to work.
 For more information, see https://en.wikipedia.org/wiki/PATH_(variable).
