@@ -29,6 +29,10 @@ if %1 == --verbose     goto help
 if %1 == -i            goto help
 if %1 == --make-index  goto help
 if %1 == --dry-run     goto help
+if %1 == -u            goto help
+if %1 == --include     goto help
+if %1 == -r            goto help
+if %1 == --readme      goto help
 
 ::Check for project.godot
 set project_path=%1
@@ -85,6 +89,14 @@ echo.
 echo   -i
 echo   --make-index  If this flag is present, create an index.md page with a table
 echo                 of contents.
+echo.
+echo   -u
+echo   --include     Path to a directory containing md files to include in the TOC
+echo                 created by the -i command.
+echo.
+echo   -r
+echo   --readme      Path to a readme.md file to include at the beginning of the TOC
+echo                 created by the -i command.
 echo.
 goto end
 
@@ -167,6 +179,10 @@ goto end
    if %~1 == --author     goto parameterized
    if %~1 == -f           goto parameterized
    if %~1 == --format     goto parameterized
+   if %~1 == -u           goto parameterized
+   if %~1 == --include    goto parameterized
+   if %~1 == -r           goto parameterized
+   if %~1 == --readme     goto parameterized
    
    if %~1 == -i           goto flags
    if %~1 == --make-index goto flags
@@ -198,6 +214,8 @@ goto end
    if %parsed% == --date set parsed=-d
    if %parsed% == --author set parsed=-a
    if %parsed% == --format set parsed=-f
+   if %parsed% == --include set parsed=-u
+   if %parsed% == --readme set parsed=-r
    
    for /l %%n in (0,1,%param_n%) do (
       if !parameters[%%n].option! == %parsed% (

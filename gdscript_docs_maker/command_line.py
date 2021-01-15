@@ -71,6 +71,20 @@ def parse(args=sys.argv) -> Namespace:
         help="If this flag is present, create an index.md page with a table of contents.",
     )
     parser.add_argument(
+        "-u",
+        "--include",
+        type=str,
+        default="",
+        help="Path to a directory containing md files to include in the TOC created by the -i command.",
+    )
+    parser.add_argument(
+        "-r",
+        "--readme",
+        type=str,
+        default=None,
+        help="Path to a readme.md file to include at the beginning of the TOC created by the -i command.",
+    )
+    parser.add_argument(
         "-v",
         "--verbose",
         action="count",

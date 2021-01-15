@@ -5,7 +5,7 @@ extends SceneTree
 
 var Collector: SceneTree = load("Collector.gd").new()
 # A list of directories to collect files from.
-var directories := ["res://"]
+var directories := ["res://assets", "res://scenes", "res://scripts"]
 # If true, explore each directory recursively
 var is_recursive: = true
 # A list of patterns to filter files.

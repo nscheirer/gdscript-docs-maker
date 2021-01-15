@@ -3,6 +3,9 @@ documents
 
 """
 import re
+import os
+import http.client
+from urllib.parse import urlparse
 from argparse import Namespace
 from typing import List
 
@@ -26,6 +29,17 @@ from .make_markdown import (
 )
 
 
+def iterate_dir(path: str, found: list):
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            if os.path.splitext(file)[1] in ['.md']:
+                found.append(os.path.join(*os.path.join(root, file).split(os.path.sep)[1:]))
+                pass
+            pass
+        pass
+    pass
+
+
 def convert_to_markdown(
     classes: GDScriptClasses, arguments: Namespace, info: ProjectInfo
 ) -> List[MarkdownDocument]:
@@ -35,7 +49,11 @@ def convert_to_markdown(
     """
     markdown: List[MarkdownDocument] = []
     if arguments.make_index:
-        markdown.append(_write_index_page(classes, info))
+        include = []
+        if arguments.include:
+            iterate_dir(arguments.path, include)
+            pass
+        markdown.append(_write_index_page(classes, info, include=include, readme=arguments.readme))
     for entry in classes:
         markdown.append(_as_markdown(classes, entry, arguments))
     return markdown
@@ -49,6 +67,9 @@ def _as_markdown(
 
     content: List[str] = []
     output_format: OutputFormats = arguments.format
+
+    if not gdscript.name:
+        gdscript.name = os.path.splitext(os.path.basename(gdscript.path))[0]
 
     name: str = gdscript.name
     if "abstract" in gdscript.metadata.tags:
@@ -70,7 +91,16 @@ def _as_markdown(
         content += [*make_heading(name, 1)]
     if gdscript.extends:
         extends_list: List[str] = gdscript.get_extends_tree(classes)
-        extends_links = [make_link(entry, "../" + entry) for entry in extends_list]
+
+        def check_url(url):
+            parsed = urlparse(url)
+            c = http.client.HTTPSConnection(parsed.netloc)
+            c.request("HEAD", parsed.path)
+            if c.getresponse().status == 200:
+                return True
+            return False
+
+        extends_links = [make_link(entry, "../" + entry) if not check_url(f"https://docs.godotengine.org/en/stable/classes/class_{entry.lower()}.html") else make_link(entry, f"https://docs.godotengine.org/en/stable/classes/class_{entry.lower()}.html") for entry in extends_list]
         content += [make_bold("Extends:") + " " + " < ".join(extends_links)]
         description = _replace_references(classes, gdscript, gdscript.description)
         content += [*MarkdownSection("Description", 2, [description]).as_text()]
@@ -158,35 +188,59 @@ def _write_signals(
     )
 
 
-def _write_index_page(classes: GDScriptClasses, info: ProjectInfo) -> MarkdownDocument:
+def _write_index_page(classes: GDScriptClasses, info: ProjectInfo, include: list = None, readme: str = None) -> MarkdownDocument:
     title: str = "{} ({})".format(info.name, surround_with_html(info.version, "small"))
-    content: List[str] = [
-        *MarkdownSection(title, 1, info.description).as_text(),
-        *MarkdownSection("Contents", 2, _write_table_of_contents(classes)).as_text(),
-    ]
+    content: List[str] = [*MarkdownSection(title, 1, [info.description]).as_text()]
+
+    if readme:
+        content += MarkdownSection("", 1, _write_document(readme)).as_text()
+        pass
+
+    content += MarkdownSection("Contents", 2, _write_table_of_contents(classes, include=include)).as_text()
+
     return MarkdownDocument("index", content)
 
 
-def _write_table_of_contents(classes: GDScriptClasses) -> List[str]:
+def _write_table_of_contents(classes: GDScriptClasses, include: list = None) -> List[str]:
     toc: List[str] = []
 
+    if include:
+        toc.append("- {}".format(make_bold("Files")))
+        for file in include:
+            link: str = "  - " + make_link(
+                os.path.splitext(os.path.basename(file))[0].capitalize(), file
+            )
+            toc.append(link)
+            pass
+        pass
+
     by_category = classes.get_grouped_by_category()
+    if by_category:
+        toc.append("- {}".format(make_bold("Code - API")))
+        pass
 
     for group in by_category:
         indent: str = ""
         first_class: GDScriptClass = group[0]
-        category: str = first_class.category
+        category: str = first_class.metadata.category
         if category:
-            toc.append("- {}".format(make_bold(category)))
+            toc.append("  - {}".format(make_bold(category.capitalize())))
             indent = "  "
 
         for gdscript_class in group:
-            link: str = indent + "- " + make_link(
-                gdscript_class.name, gdscript_class.name
+            link: str = indent + "  - " + make_link(
+                gdscript_class.name.capitalize(), "pages/" + gdscript_class.name
             )
             toc.append(link)
 
     return toc
+
+
+def _write_document(path):
+    with open(path, "r") as f:
+        lines = f.readlines()
+    lines.insert(0, "")
+    return lines
 
 
 def _replace_references(

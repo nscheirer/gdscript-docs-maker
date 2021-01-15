@@ -25,7 +25,8 @@ echo_help() {
     -d/--directory        -- Name of a directory to find files and generate the code reference in the Godot project. You can use the option multiple times to generate a reference for multiple directories.
     -f/--format           -- Either `markdown` or `hugo`. If `hugo`, the output document includes a TOML front-matter at the top. Default: `markdown`.
     -a/--author           -- If --format is `hugo`, controls the author property in the TOML front-matter.
-
+    -u/--include          -- Path to a directory containing md files to include in the TOC created by the -i command.
+    -r/--readme           -- Path to a readme.md file to include at the beginning of the TOC created by the -i command.
 
     Usage example:
 
@@ -37,7 +38,7 @@ echo_help() {
 	exit 0
 }
 
-arguments=$(getopt --name "generate_reference" -o "h,o:,d:,f:,a:" -l "help,output-directory:,directories:" -- "$@")
+arguments=$(getopt --name "generate_reference" -o "h,o:,d:,f:,a:,u:,r:" -l "help,output-directory:,directories:" -- "$@")
 eval set -- "$arguments"
 while true; do
 	case "$1" in
@@ -61,7 +62,16 @@ while true; do
 		author=$2
 		shift 2
 		;;
-		
+    -u | --include)
+		include=$2
+		shift 2
+		;;
+	-r | --readme)
+		readme=$2
+		shift 2
+		;;
+	
+	
 	--)
 		shift
 		break
@@ -126,4 +136,4 @@ rm -v "$godot_project_dir/$(basename $path_collector)"
 echo "Generating markdown files in $output_directory"
 ! test -d "$output_directory" && mkdir -v "$output_directory"
 
-python3 -m gdscript_docs_maker "$godot_project_dir/reference.json" --path $output_directory --format $format --author $author
+python3 -m gdscript_docs_maker "$godot_project_dir/reference.json" --path $output_directory --format $format --author $author --include $include --readme $readme

@@ -34,7 +34,7 @@ class MarkdownSection:
         heading_level: int --
         content: List[str] -- content of the section
         """
-        self.title: List[str] = make_heading(title, heading_level)
+        self.title: List[str] = make_heading(title, heading_level) if title else []
         self.content: List[str] = content
 
     def is_empty(self) -> bool:

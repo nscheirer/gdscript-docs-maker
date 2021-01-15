@@ -5,3 +5,7 @@ src/*.egg-info
 
 # generated .md files (by generated_reference script)
 export
+
+.idea/
+
+*.pyc

@@ -1,5 +1,6 @@
 """Converts the json representation of GDScript classes as dictionaries into objects
 """
+import os
 import itertools
 import operator
 import re
@@ -286,7 +287,7 @@ class GDScriptClass:
         # class.
         extends: str = data["extends_class"][0] if data["extends_class"] else ""
         return GDScriptClass(
-            data["name"],
+            data["name"] if data["name"] else os.path.splitext(os.path.basename(data["path"]))[0],
             extends,
             data["description"],
             data["path"],
@@ -334,11 +335,11 @@ class GDScriptClasses(list):
         }
 
     def _get_grouped_by(self, attribute: str) -> List[List[GDScriptClass]]:
-        if not self or attribute not in self[0].__dict__:
+        if not self or attribute not in self[0].__dict__["metadata"].__dict__:
             return []
 
         groups = []
-        get_attribute = operator.attrgetter(attribute)
+        get_attribute = operator.attrgetter("metadata." + attribute)
         data = sorted(self, key=get_attribute)
         for key, group in itertools.groupby(data, get_attribute):
             groups.append(list(group))
