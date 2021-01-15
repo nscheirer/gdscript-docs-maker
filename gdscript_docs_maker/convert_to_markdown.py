@@ -281,7 +281,7 @@ def _replace_references(
             )
             continue
 
-        display_text, path = "", "../"
+        display_text, path = "", "./"
         if class_name:
             display_text, path = class_name, class_name
         if class_name and member:
