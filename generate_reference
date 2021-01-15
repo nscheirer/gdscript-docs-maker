@@ -64,7 +64,7 @@ while true; do
 		shift 2
 		;;
     -i | --make_index)
-		make_index=true
+		make_index=$2
 		shift 2
 		;;
     -u | --include)
@@ -75,8 +75,6 @@ while true; do
 		readme=$2
 		shift 2
 		;;
-	
-	
 	--)
 		shift
 		break
