@@ -111,7 +111,7 @@ path_collector="godot-scripts/Collector.gd"
 # Overrides the content of the directories variable in ReferenceCollectorCLI.gd if we got --directory arguments
 file_ref_collector=$(mktemp)
 cat $path_ref_collector >$file_ref_collector
-if [$directories_override != ""]; then
+if [ $directories_override != "" ]; then
 	args=$(echo $directories_override | sed -r 's/([-._a-zA-Z0-9]+)/"\1",/g' | sed -r 's/,$//')
 	sed -ri "s/^var directories.+/var directories := [$args]/" $file_ref_collector
 fi
@@ -139,9 +139,4 @@ rm -v "$godot_project_dir/$(basename $path_collector)"
 echo "Generating markdown files in $output_directory"
 ! test -d "$output_directory" && mkdir -v "$output_directory"
 
-switches=""
-if ["$make_index" = true]; then
-    switches += "-i"
-fi
-
-python3 -m gdscript_docs_maker "$godot_project_dir/reference.json" --path $output_directory --format $format --author $author --include $include --readme $readme $switches
+python3 -m gdscript_docs_maker "$godot_project_dir/reference.json" --path $output_directory --format $format --author $author --include $include --readme $readme -i
