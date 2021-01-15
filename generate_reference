@@ -140,7 +140,7 @@ echo "Generating markdown files in $output_directory"
 ! test -d "$output_directory" && mkdir -v "$output_directory"
 
 switches=""
-if [$make_index == "yes"]; then
+if test $make_index == "yes"; then
     switches += "-i"
 fi
 
