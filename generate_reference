@@ -64,7 +64,7 @@ while true; do
 		shift 2
 		;;
     -i | --make_index)
-		make_index=$2
+		make_index=true
 		shift 2
 		;;
     -u | --include)
@@ -140,7 +140,7 @@ echo "Generating markdown files in $output_directory"
 ! test -d "$output_directory" && mkdir -v "$output_directory"
 
 switches=""
-if test $make_index == true; then
+if [$make_index == true]; then
     switches += "-i"
 fi
 
