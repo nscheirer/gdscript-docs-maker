@@ -100,7 +100,7 @@ def _as_markdown(
                 return True
             return False
 
-        extends_links = [make_link(entry, "../" + entry) if not check_url(f"https://docs.godotengine.org/en/stable/classes/class_{entry.lower()}.html") else make_link(entry, f"https://docs.godotengine.org/en/stable/classes/class_{entry.lower()}.html") for entry in extends_list]
+        extends_links = [make_link(entry, entry) if not check_url(f"https://docs.godotengine.org/en/stable/classes/class_{entry.lower()}.html") else make_link(entry, f"https://docs.godotengine.org/en/stable/classes/class_{entry.lower()}.html") for entry in extends_list]
         content += [make_bold("Extends:") + " " + " < ".join(extends_links)]
         description = _replace_references(classes, gdscript, gdscript.description)
         content += [*MarkdownSection("Description", 2, [description]).as_text()]
@@ -281,7 +281,7 @@ def _replace_references(
             )
             continue
 
-        display_text, path = "", "./"
+        display_text, path = "", "../"
         if class_name:
             display_text, path = class_name, class_name
         if class_name and member:
